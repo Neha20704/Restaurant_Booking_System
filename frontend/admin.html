@@ -1,0 +1,165 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Reservations</title>
+  <style>
+    
+    /* Basic body styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #eef2f3;
+      text-align: center;
+      padding: 20px;
+      color: #1f3b73;
+    }
+
+    h2 {
+      color: #0e2f5a;
+    }
+
+    /* Table styling */
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #0e2f5a;
+      color: white;
+    }
+
+    /* Logout button styling */
+    button {
+      background: #0e2f5a;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Redirect to login if not an admin -->
+  <script>
+    if (localStorage.getItem('isAdmin') !== 'true') {
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <h2>All Reservations</h2>
+  <input type="text" id="searchInput" placeholder="Search by customer name..." style="padding: 8px; width: 300px; margin-bottom: 20px;" oninput="searchReservations()">
+
+  <!-- Reservation table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Table ID</th>
+        <th>Date</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="reservations"></tbody> <!-- Table rows will be inserted here dynamically -->
+  </table>
+
+  <!-- Logout button -->
+  <button onclick="logout()">Logout</button>
+
+  <script>
+    // Fetch and display all reservations from backend
+    async function loadReservations() {
+      try {
+        const response = await fetch('http://localhost:8081/api/reservations'); // API call to get reservations
+        const data = await response.json();
+
+        const tableBody = document.getElementById('reservations');
+        tableBody.innerHTML = ''; // Clear previous entries
+
+        if (!data.length) {
+          // No reservations found
+          tableBody.innerHTML = '<tr><td colspan="3">No reservations found.</td></tr>';
+          return;
+        }
+
+        // Populate the table with reservation data
+        data.forEach(res => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${res.customerName}</td>
+            <td>${res.table.id}</td>
+            <td>${res.date}</td>
+            <td>${res.arrivalTime} - ${res.departureTime}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+      } catch (error) {
+        console.error("Error loading reservations:", error);
+      }
+    }
+
+    async function searchReservations() {
+    const query = document.getElementById("searchInput").value.trim();
+
+    try {
+      const url = query
+        ? `http://localhost:8081/api/reservations/search?name=${encodeURIComponent(query)}`
+        : `http://localhost:8081/api/reservations`; // fallback to all
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const tableBody = document.getElementById("reservations");
+      tableBody.innerHTML = "";
+
+      if (!data.length) {
+        tableBody.innerHTML = '<tr><td colspan="4">No reservations found.</td></tr>';
+        return;
+      }
+
+      data.forEach(res => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${res.customerName}</td>
+          <td>${res.table.id}</td>
+          <td>${res.date}</td>
+          <td>${res.arrivalTime} - ${res.departureTime}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+    } catch (error) {
+      console.error("Error during search:", error);
+    }
+  }
+
+
+
+    // Clears admin login status and redirects to login page
+    function logout() {
+      localStorage.removeItem('isAdmin');
+      window.location.href = 'login.html';
+    }
+
+    // Run loadReservations after DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", loadReservations);
+  </script>
+</body>
+</html>

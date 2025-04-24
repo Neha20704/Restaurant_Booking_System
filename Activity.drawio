@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:uml="http://www.omg.org/spec/UML/20090901">
+  <packagedElement xmi:type="uml:Activity" name="CustomerReservationFlow">
+    <node xmi:type="uml:InitialNode" name="Start"/>
+    
+    <node xmi:type="uml:Action" name="View Available Tables"/>
+    <node xmi:type="uml:Action" name="Select Date and Time"/>
+    <node xmi:type="uml:DecisionNode" name="Validate Time Slot"/>
+    <node xmi:type="uml:Action" name="Create Reservation"/>
+    <node xmi:type="uml:Action" name="Display Success Message"/>
+    <node xmi:type="uml:Action" name="Show Error Message"/>
+    <node xmi:type="uml:FinalNode" name="End"/>
+    
+    <edge source="Start" target="View Available Tables"/>
+    <edge source="View Available Tables" target="Select Date and Time"/>
+    <edge source="Select Date and Time" target="Validate Time Slot"/>
+    <edge source="Validate Time Slot" target="Create Reservation">
+      <guard>valid</guard>
+    </edge>
+    <edge source="Validate Time Slot" target="Show Error Message">
+      <guard>invalid</guard>
+    </edge>
+    <edge source="Create Reservation" target="Display Success Message"/>
+    <edge source="Display Success Message" target="End"/>
+    <edge source="Show Error Message" target="End"/>
+  </packagedElement>
+</uml:Model>

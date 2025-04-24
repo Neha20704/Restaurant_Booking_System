@@ -1,0 +1,6 @@
+mvn clean package
+java -jar target/my-spring-boot-app-1.0.0.jar
+python -m http.server 8082
+http://localhost:8081/api/reservations
+http://localhost:8082/
+
